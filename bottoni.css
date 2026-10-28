@@ -1,0 +1,9 @@
+/* Bottoni nuovi: spigolo vivo, ombra piena che si abbassa quando li tocchi */
+.btn{font-family:var(--f-ui);font-weight:700;font-size:.875rem;text-transform:uppercase;letter-spacing:.1em;border-radius:2px;border-width:2px;padding:16px 24px;box-shadow:4px 4px 0 var(--line);transition:transform .15s,box-shadow .15s,background-color .15s}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--line);background:transparent}
+.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--line)}
+.btn--main{box-shadow:4px 4px 0 rgba(232,169,58,.35)}
+.btn--main:hover{background:#f2bb55;border-color:#f2bb55}
+.nav-pill{border-radius:2px;padding:8px 16px!important;font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.8125rem}
+.action-bar .btn{box-shadow:none;border-radius:2px;letter-spacing:.06em;font-size:.75rem}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}}
