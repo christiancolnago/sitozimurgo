@@ -111,6 +111,8 @@
   var hGlass = hero && hero.querySelector(".glass");
   var hLiq = hGlass ? hGlass.querySelectorAll(".liq") : [], hLogo = hGlass && hGlass.querySelector(".lgo");
   var G = null;
+  // Logo del bicchiere decodificato in anticipo, così non pesa sul primo movimento
+  try { var pre = new Image(); pre.src = "logo-verde.png"; if (pre.decode) pre.decode().catch(function () {}); } catch (e) {}
   // Altezza dello schermo "stabile": su telefono la barra del browser che appare e scompare cambia window.innerHeight
   // mentre si scorre. Usiamo l'altezza del riquadro (100svh), che non cambia, così nulla si sposta durante lo scorrimento.
   var SH = window.innerHeight;
@@ -129,7 +131,7 @@
     var Sz = (0.86 * Math.min(vw, vh)) / (0.36 * W);
     // Il bicchiere è disegnato già alla dimensione finale dello zoom (K volte più grande) e rimpicciolito:
     // durante lo zoom il browser sposta soltanto un'immagine già pronta, senza ridisegnarla a ogni passo, ed è nitido.
-    var K = Math.max(1, Math.min(Sz, 1600 / W));
+    var K = Math.max(1, Math.min(Sz, 1300 / W));
     var Wb = W * K, Hb = 1.5 * Wb, ys0 = top + 0.62 * H;
     hGlass.style.width = Wb + "px";
     hGlass.style.left = ((vw - Wb) / 2) + "px";
@@ -161,7 +163,7 @@
     var s = Math.pow(G.S, e);
     var dy = G.E * (1 - easeO(tin)) + (G.vh / 2 - G.ys - G.E * (1 - easeO(tin))) * e;
     hGlass.style.transform = "translate(0," + dy.toFixed(1) + "px) scale(" + (s / G.K).toFixed(5) + ")";
-    hGlass.style.opacity = vis.toFixed(3);
+    hGlass.style.opacity = Math.max(0.004, vis).toFixed(3);
     // finito lo zoom la birra sparisce in fretta e resta il logo, che si dissolve sullo sfondo del sito
     var lq = u > 1 ? "0" : "1", lg = (1 - clamp((u - 1.09) / 0.14)).toFixed(3);
     for (var i = 0; i < hLiq.length; i++) hLiq[i].style.opacity = lq;
