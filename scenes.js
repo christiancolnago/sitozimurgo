@@ -104,17 +104,18 @@
   var STYLES = ["Chiara", "Torbida", "Ambrata", "Rossa", "Scura", "Acida"];
   var ticking = false;
 
-  // Scena 1: geometria calcolata sullo schermo reale
+  // Scena 1: il bicchiere è già al suo posto; scorrendo si riempie e poi si zooma sul logo.
+  // Muovono solo due elementi leggeri (il bicchiere e il logo), niente dissolvenze su livelli grandi.
   var hero = document.querySelector('[data-scene="hero"]');
   var hStage = hero && hero.querySelector(".stage");
-  var hCopy = hero && hero.querySelector(".hero-copy");
   var hGlass = hero && hero.querySelector(".glass");
+  var hFill = hGlass && hGlass.querySelector(".fill");
   var hLiq = hGlass ? hGlass.querySelectorAll(".liq") : [], hLogo = hGlass && hGlass.querySelector(".lgo");
   var G = null;
-  // Logo del bicchiere decodificato in anticipo, così non pesa sul primo movimento
+  // Logo decodificato in anticipo
   try { var pre = new Image(); pre.src = "logo-verde.png"; if (pre.decode) pre.decode().catch(function () {}); } catch (e) {}
-  // Altezza dello schermo "stabile": su telefono la barra del browser che appare e scompare cambia window.innerHeight
-  // mentre si scorre. Usiamo l'altezza del riquadro (100svh), che non cambia, così nulla si sposta durante lo scorrimento.
+  // Altezza dello schermo "stabile": su telefono la barra del browser che si nasconde cambia window.innerHeight
+  // mentre si scorre; usiamo l'altezza del riquadro (100svh), che non cambia.
   var SH = window.innerHeight;
   function layoutHero() {
     if (!hero) return;
@@ -122,53 +123,44 @@
     SH = ih;
     var hd = document.querySelector(".site-head"), hh = hd ? hd.offsetHeight : 0;
     var vv = Math.min(vh, ih - hh);                       // altezza visibile sotto l'intestazione
-    // Il testo sta da solo, centrato nello schermo
-    hCopy.style.top = Math.max(24, (vv - hCopy.offsetHeight) / 2 - 8) + "px";
-    // Il bicchiere sta fermo al centro dello schermo (poi arriva dal basso)
-    var W = Math.max(110, Math.min(340, vw * 0.46, 0.4 * vv));
+    var W = Math.max(120, Math.min(340, vw * 0.6, 0.42 * vv));
     var H = 1.5 * W;
-    var top = (ih + hh) / 2 - H / 2;
-    var Sz = (0.86 * Math.min(vw, vh)) / (0.36 * W);
-    // Il bicchiere è disegnato già alla dimensione finale dello zoom (K volte più grande) e rimpicciolito:
-    // durante lo zoom il browser sposta soltanto un'immagine già pronta, senza ridisegnarla a ogni passo, ed è nitido.
-    var K = Math.max(1, Math.min(Sz, 520 / W));
+    var top = (ih + hh) / 2 - H / 2;                      // bicchiere centrato nello spazio visibile
+    var Sz = (0.86 * Math.min(vw, vh)) / (0.36 * W);      // zoom finale: il logo riempie lo schermo
+    // Il bicchiere è disegnato al doppio della dimensione e rimpicciolito: resta nitido durante lo zoom
+    // senza creare immagini enormi (memoria e fluidità sui telefoni vecchi).
+    var K = Math.max(1, Math.min(Sz, 2, 520 / W));
     var Wb = W * K, Hb = 1.5 * Wb, ys0 = top + 0.62 * H;
     hGlass.style.width = Wb + "px";
     hGlass.style.left = ((vw - Wb) / 2) + "px";
     hGlass.style.top = (ys0 - 0.62 * Hb) + "px";
-    hero.style.setProperty("--bg", "0");
-    // Tempi dello scorrimento, in pixel: 1 testo esce, 2 il bicchiere sale dal basso, 3 pausa, 4 zoom
-    var Z = 1.0125 * ih;
-    var T = { out: 0.5 * ih, inStart: 0.3 * ih, inEnd: 0.8 * ih, zoom: 1.0 * ih, Z: Z };
-    if (document.documentElement.classList.contains("fx")) hero.style.setProperty("--h", Math.round(T.zoom + 1.3 * Z + ih) + "px");
-    // il bicchiere parte interamente sotto lo schermo e sale: niente dissolvenza (costosa su un livello grande)
-    var Ein = ih - ys0 + 0.62 * H + 8;
-    G = { T: T, hh: hh, vw: vw, vh: vh, vv: vv, W: W, K: K, ys: ys0, S: Sz, E: Ein };
+    // Tempi dello scorrimento, in pixel: riempimento, breve pausa, zoom, coda in cui il logo si dissolve
+    var F = 0.8 * ih, P = 0.12 * ih, Z = 0.95 * ih;
+    var span = Math.round(F + P + 1.3 * Z);
+    hero.style.setProperty("--h", (ih + span) + "px");
+    G = { F: F, P: P, Z: Z, span: span, vh: vh, K: K, ys: ys0, S: Sz };
+    last.fill = last.tf = last.lg = last.lq = null;
   }
   function easeIO(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
   function easeO(t) { return 1 - Math.pow(1 - t, 3); }
+  var last = { fill: null, tf: null, lg: null, lq: null };
   function heroFrame(p) {
     if (!G) return;
-    var T = G.T, span = hero.offsetHeight - SH;
-    var sc = p * span;
-    // 1) il testo sale e svanisce, da solo
-    var shift = Math.max(0, sc - G.hh);
-    hCopy.style.transform = "translate(-50%," + (-shift).toFixed(1) + "px)";
-    hCopy.style.opacity = (1 - clamp(sc / T.out)).toFixed(3);
-    hCopy.classList.toggle("is-gone", sc > T.out);
-    // 2) il bicchiere sale dal basso fino al centro e compare
-    var tin = clamp((sc - T.inStart) / (T.inEnd - T.inStart));
-    // 3) pausa, 4) zoom nel logo
-    var u = (sc - T.zoom) / T.Z;
+    var sc = p * G.span;
+    // 1) il bicchiere si riempie (la birra sale e fa la schiuma)
+    var f = easeO(clamp(sc / G.F));
+    var fill = ((1 - f) * 272).toFixed(1);
+    if (fill !== last.fill) { last.fill = fill; hFill.style.transform = "translateY(" + fill + "px)"; }
+    // 2) pausa, 3) zoom nel logo
+    var u = (sc - G.F - G.P) / G.Z;
     var e = easeIO(clamp(u));
-    var s = Math.pow(G.S, e);
-    var dy = G.E * (1 - easeO(tin)) + (G.vh / 2 - G.ys - G.E * (1 - easeO(tin))) * e;
-    hGlass.style.transform = "translate(0," + dy.toFixed(1) + "px) scale(" + (s / G.K).toFixed(5) + ")";
-    
-    // finito lo zoom la birra sparisce in fretta e resta il logo, che si dissolve sullo sfondo del sito
-    var lq = u > 1 ? "0" : "1", lg = (1 - clamp((u - 1.09) / 0.14)).toFixed(3);
-    for (var i = 0; i < hLiq.length; i++) hLiq[i].style.opacity = lq;
-    if (hLogo) hLogo.style.opacity = lg;
+    var tf = "translate3d(0," + ((G.vh / 2 - G.ys) * e).toFixed(1) + "px,0) scale(" + (Math.pow(G.S, e) / G.K).toFixed(5) + ")";
+    if (tf !== last.tf) { last.tf = tf; hGlass.style.transform = tf; }
+    // finito lo zoom la birra sparisce e resta il logo, che si dissolve sullo sfondo del sito
+    var lq = u > 1 ? "0" : "1";
+    if (lq !== last.lq) { last.lq = lq; for (var i = 0; i < hLiq.length; i++) hLiq[i].style.opacity = lq; }
+    var lg = Math.min(clamp((f - 0.45) / 0.3), 1 - clamp((u - 1.09) / 0.14)).toFixed(3);
+    if (hLogo && lg !== last.lg) { last.lg = lg; hLogo.style.opacity = lg; }
   }
 
   function clamp(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }

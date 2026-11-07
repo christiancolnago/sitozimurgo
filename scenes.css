@@ -15,21 +15,21 @@
 
 /* ---------- scena 1: bicchiere ---------- */
 .scene--hero .stage{background:radial-gradient(900px 600px at 50% 70%,rgba(232,169,58,.16),transparent 70%),var(--bottle)}
+.hero-intro{position:relative;min-height:calc(100svh - 64px);display:grid;place-items:center;text-align:center;padding:40px var(--gutter) 76px;background:radial-gradient(900px 600px at 50% 100%,rgba(232,169,58,.14),transparent 70%),var(--bottle)}
 .hero-copy{position:relative;z-index:2;max-width:980px}
 .hero-copy h1{font-size:clamp(2.8rem,10.5vw,8.4rem);max-width:none;margin-bottom:.35em;line-height:.95;letter-spacing:-.04em}
 .hero-copy .lead{max-width:34ch;font-size:clamp(1.1rem,2.6vw,1.5rem)}
 .hero-copy .btn-row{justify-content:center}
-.glass{width:min(46vmin,360px);margin:clamp(80px,16vh,160px) auto 0}
+.glass{position:relative;width:min(46vmin,360px);margin:0 auto}
+.glass .lgo{position:absolute;left:32%;top:50%;width:36%;height:auto;display:block}
 .glass svg{display:block;width:100%;height:auto}
 .flood{display:none}
-.fx .glass{position:absolute;left:0;top:0;margin:0;width:200px;transform-origin:50% 62%;pointer-events:none}
-.fx .hero-copy{position:absolute;top:clamp(76px,12svh,120px);left:50%;transform:translate(-50%,calc(var(--p) * -50px));width:calc(100% - 2*var(--gutter));opacity:clamp(0,calc(1.35 - var(--p) * 8),1)}
-.hero-copy.is-gone{visibility:hidden;pointer-events:none}
-.fx .scene--hero .stage{background:color-mix(in oklab,var(--bottle),var(--amber) calc(var(--bg,0) * 100%))}
+.fx .glass{position:absolute;left:0;top:0;margin:0;width:200px;transform-origin:50% 62%;pointer-events:none;will-change:transform}
+.fx .glass .lgo{will-change:opacity}
+.fx .scene--hero .stage{background:var(--bottle)}
 .fx .flood{display:none}
 .scroll-hint{display:none}
-.fx .scroll-hint{pointer-events:none;display:block;position:absolute;z-index:4;bottom:18px;left:0;right:0;margin:0;font-family:var(--f-ui);font-size:.85rem;color:var(--chalk-dim);
-  opacity:clamp(0,calc(1 - var(--p) * 8),1)}
+.fx .scroll-hint{pointer-events:none;display:block;position:absolute;z-index:4;bottom:18px;left:0;right:0;margin:0;font-family:var(--f-ui);font-size:.85rem;color:var(--chalk-dim)}
 
 /* ---------- scena 2: sei vie ---------- */
 .scene--taps .stage{background:var(--bottle);gap:0;align-content:center}
@@ -118,7 +118,6 @@
 @media (max-width:600px){
   .nav a:nth-child(-n+2){display:none}
   .nav{margin-left:auto;gap:4px 14px}
-  .fx .hero-copy{top:clamp(80px,14svh,120px)}
   .scene--fridges .stage .lead{font-size:1rem;line-height:1.5}
   .fridges{height:min(34svh,300px)}
   .wine-bottle svg{height:min(36svh,320px)}
@@ -186,7 +185,6 @@
   .hero-copy .lead{max-width:50ch;margin-inline:auto;font-size:1.25rem}
   .hero-copy .hook{margin-bottom:.5em}
   .hero-copy .btn-row{margin-top:32px}
-  .fx .hero-copy{top:clamp(88px,13svh,140px)}
 }
 
 /* ---------- bottiglia e calice che si riempiono insieme ---------- */
@@ -201,5 +199,11 @@
    e gli elementi che si muovono vengono preparati dal browser come livelli a sé. */
 .fx .site-head{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0f1f18}
 @media (max-width:700px){.fx .action-bar{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0f1f18}}
-.fx .scene--hero .hero-copy{will-change:transform,opacity}
-.fx .scene--hero .glass{will-change:transform,opacity}
+
+/* Intestazione su schermi stretti (e con carattere di sistema ingrandito): una sola riga, mai a capo */
+@media (max-width:420px){
+  .site-head .wrap{flex-wrap:nowrap;gap:10px}
+  .brand{font-size:1.1rem;min-width:0}
+  .nav{flex-wrap:nowrap;gap:0 10px;white-space:nowrap}
+  .nav a:not(.nav-pill){display:none}
+}
