@@ -217,18 +217,18 @@ a,button,summary{touch-action:manipulation;-webkit-tap-highlight-color:rgba(232,
 /* Foto */
 .photo{position:relative}
 .photo img{display:block;width:100%;height:auto}
-.photo--wide img{aspect-ratio:16/9;object-fit:cover}
+.photo--wide img{height:auto}
 .photo--side{max-width:300px;margin:0 0 22px}
 .band{padding-block:0 clamp(40px,7vw,80px)}
 .duo-photo{display:grid;gap:clamp(20px,5vw,64px);grid-template-columns:1fr;align-items:center}
 @media(min-width:820px){.duo-photo{grid-template-columns:.9fr 1.1fr}}
 .duo-fun{display:grid;gap:14px;grid-template-columns:1fr}
 @media(min-width:720px){.duo-fun{grid-template-columns:1fr 1fr}}
-.duo-fun .photo img{aspect-ratio:16/10;object-fit:cover}
-.gallery{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);margin-top:clamp(28px,5vw,48px)}
-.gallery figure{margin:0;position:relative;overflow:hidden;border-radius:8px;aspect-ratio:4/5;background:var(--slate-2)}
-.gallery img{display:block;width:100%;height:100%;object-fit:cover}
-@media(min-width:600px){.gallery{grid-template-columns:repeat(3,1fr)}}
+.duo-fun .photo img{height:auto}
+.gallery{columns:2;column-gap:10px;margin-top:clamp(28px,5vw,48px)}
+.gallery figure{margin:0;position:relative;overflow:hidden;border-radius:8px;margin-bottom:10px;break-inside:avoid;background:var(--slate-2)}
+.gallery img{display:block;width:100%;height:auto}
+@media(min-width:600px){.gallery{columns:3}}
 
 /* Ancore: lasciano spazio sotto l'intestazione */
 section[id]{scroll-margin-top:64px}
@@ -246,11 +246,11 @@ section[id]{scroll-margin-top:64px}
 /* Carosello foto (home) */
 .carousel{margin-top:clamp(28px,5vw,48px)}
 .car-main{position:relative}
-.car-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:10px;background:var(--slate-2);overscroll-behavior-x:contain}
+.car-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:10px;background:#0d1713;overscroll-behavior-x:contain}
 .car-track::-webkit-scrollbar{display:none}
 .car-track:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
 .car-track figure{flex:0 0 100%;margin:0;scroll-snap-align:center;aspect-ratio:4/5;position:relative}
-.car-track img{display:block;width:100%;height:100%;object-fit:cover}
+.car-track img{display:block;width:100%;height:100%;object-fit:contain}
 @media(min-width:700px){
   .carousel{max-width:860px;margin-left:auto;margin-right:auto}
   /* su computer la foto grande non supera mai l'altezza dello schermo (portatili inclusi): foto + miniature restano in vista */
